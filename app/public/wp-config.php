@@ -38,6 +38,11 @@ define( 'DB_CHARSET', 'utf8' );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
 
+
+// ** Set site URL dynamically based on environment ** //
+define( 'WP_HOME', getenv('WP_HOME') ?: 'http://localhost:8080' );
+define( 'WP_SITEURL', getenv('WP_SITEURL') ?: 'http://localhost:8080' );
+
 /**#@+
  * Authentication unique keys and salts.
  *
