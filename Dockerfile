@@ -1,33 +1,32 @@
-# Use official PHP image with FPM
 FROM php:8.2-fpm
 
-# Install required PHP extensions
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libonig-dev \
-    libxml2-dev \
+    nginx \
+    curl \
     zip \
     unzip \
-    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+    mariadb-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd mbstring zip mysqli pdo pdo_mysql
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy all WordPress files into container (mounted via docker-compose)
-# In production, you might COPY instead of mount
-COPY ./app/public/ /var/www/html/
+# Copy WordPress files to /var/www/html
+COPY . /var/www/html
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Expose port for FPM (used internally with NGINX)
-EXPOSE 9000
+# Copy Nginx config
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-# Start PHP-FPM server
-CMD ["php-fpm"]
+# Expose Render's port
+EXPOSE $PORT
+
+# Start both Nginx & PHP-FPM
+CMD service nginx start && php-fpm
