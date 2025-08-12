@@ -14,19 +14,19 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd mysqli pdo pdo_mysql zip mbstring
 
-# Copy WordPress files into container
-COPY . /var/www/html
+# Copy WordPress files into container at the correct path
+COPY app/public /var/www/html/app/public
 
-# Set ownership
-RUN chown -R www-data:www-data /var/www/html
+# Set ownership for web files
+RUN chown -R www-data:www-data /var/www/html/app/public
 
 # Copy Nginx config template
-COPY default.conf /etc/nginx/conf.d/default.conf.template
+COPY nignix/default.conf /etc/nginx/conf.d/default.conf.template
 
-# Replace ${PORT} with actual env var at runtime & start services
-CMD envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf \
-    && service nginx start \
-    && php-fpm
+# Replace ${PORT} with env var & start php-fpm and nginx together
+CMD envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && \
+    php-fpm & \
+    nginx -g 'daemon off;'
 
-# Render will detect port from EXPOSE
+# Expose the port from environment variable
 EXPOSE $PORT
