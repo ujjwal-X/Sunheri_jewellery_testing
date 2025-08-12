@@ -1,32 +1,32 @@
 FROM php:8.2-fpm
 
-# Install dependencies
+# Install Nginx and PHP extensions for WordPress
 RUN apt-get update && apt-get install -y \
     nginx \
-    curl \
-    zip \
-    unzip \
+    gettext-base \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libzip-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev \
     mariadb-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd mbstring zip mysqli pdo pdo_mysql
+    && docker-php-ext-install gd mysqli pdo pdo_mysql zip mbstring
 
-# Copy WordPress files to /var/www/html
+# Copy WordPress files into container
 COPY . /var/www/html
 
-# Set permissions
+# Set ownership
 RUN chown -R www-data:www-data /var/www/html
 
-# Copy Nginx config
-COPY default.conf /etc/nginx/conf.d/default.conf
+# Copy Nginx config template
+COPY default.conf /etc/nginx/conf.d/default.conf.template
 
-# Expose Render's port
+# Replace ${PORT} with actual env var at runtime & start services
+CMD envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf \
+    && service nginx start \
+    && php-fpm
+
+# Render will detect port from EXPOSE
 EXPOSE $PORT
-
-# Start both Nginx & PHP-FPM
-CMD service nginx start && php-fpm
