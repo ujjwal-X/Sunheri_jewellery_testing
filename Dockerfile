@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy WordPress files
+# Copy WordPress files into container
 COPY app/public/ /var/www/html/
 
 # Set ownership and permissions
@@ -33,4 +33,5 @@ COPY conf/default.conf /etc/nginx/conf.d/default.conf.template
 CMD envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf \
     && nginx -g 'daemon off;' & php-fpm
 
+# Expose the port (Render will set PORT automatically)
 EXPOSE 80
