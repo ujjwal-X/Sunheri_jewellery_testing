@@ -1,0 +1,13 @@
+<?php
+/**
+ * Template part for displaying site info
+ *
+ * @package Hello Shoppable
+ */
+?>
+
+<div class="site-info">
+    <?php
+    echo '&copy; 2022-2024 by <a href="mailto:sunehrijewellery@gmail.com">SUNEHRI JEWELLERY</a>';
+    ?>
+</div><!-- .site-info -->
